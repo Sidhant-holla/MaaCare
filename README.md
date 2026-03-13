@@ -60,5 +60,3 @@ Integrations
 - IoT health devices
 - SMS / WhatsApp alerts
 
-## Repository Structure
-
