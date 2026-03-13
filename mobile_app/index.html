@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>MaaCare Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+<h1>MaaCare</h1>
+<p>Maternal Health Monitoring</p>
+</header>
+
+<div class="dashboard">
+
+<div class="card">
+
+<h2>Enter Patient Vitals</h2>
+
+<input id="age" placeholder="Age">
+
+<input id="bp" placeholder="Blood Pressure">
+
+<input id="glucose" placeholder="Glucose">
+
+<input id="weight" placeholder="Weight">
+
+<button onclick="analyze()">Analyze Risk</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>Risk Prediction</h2>
+
+<div id="riskBox" class="risk low">
+Low Risk
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>Vitals Trend</h2>
+
+<canvas id="chart"></canvas>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
