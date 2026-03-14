@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 
-# Connect to MongoDB
+# MongoDB connection
 client = MongoClient("mongodb://localhost:27017/")
 db = client["MaaCare"]
 collection = db["Readings"]
@@ -16,42 +17,59 @@ def home():
     return jsonify({"message": "MaaCare Backend Running"})
 
 
-# Risk calculation logic
-def calculate_risk(bp, glucose, weight):
-    if bp > 140 or glucose > 150 or weight > 90:
+# Risk logic
+def calculate_risk(bp, glucose, bmi, age):
+    score = 0
+
+    if bp >= 140:
+        score += 1
+    if glucose >= 150:
+        score += 1
+    if bmi >= 30:
+        score += 1
+    if age >= 35:
+        score += 1
+
+    if score >= 2:
         return "High Risk"
-    elif bp >= 130 or glucose >= 130 or weight >= 80:
+    elif score == 1:
         return "Medium Risk"
     else:
         return "Low Risk"
 
 
-# Predict risk and store reading
+# Prediction endpoint
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
         data = request.get_json()
 
-        age = float(data["age"])
-        bp = float(data["bp"])
+        pregnancies = int(data["pregnancies"])
         glucose = float(data["glucose"])
-        weight = float(data["weight"])
+        bp = float(data["blood_pressure"])
+        bmi = float(data["bmi"])
+        age = int(data["age"])
 
-        risk = calculate_risk(bp, glucose, weight)
+        symptoms = data.get("symptoms", [])
+
+        risk = calculate_risk(bp, glucose, bmi, age)
 
         reading = {
-            "age": age,
-            "bp": bp,
+            "pregnancies": pregnancies,
             "glucose": glucose,
-            "weight": weight,
-            "risk": risk
+            "blood_pressure": bp,
+            "bmi": bmi,
+            "age": age,
+            "symptoms": symptoms,
+            "risk": risk,
+            "timestamp": datetime.utcnow()
         }
 
         # Save to MongoDB
         collection.insert_one(reading)
 
-        # Get last 10 readings
-        history = list(collection.find({}, {"_id": 0}).sort("_id", -1).limit(10))
+        # Return last 10 readings
+        history = list(collection.find({}, {"_id": 0}).sort("timestamp", -1).limit(10))
 
         return jsonify({
             "risk": risk,
@@ -65,10 +83,10 @@ def predict():
         }), 400
 
 
-# Get previous readings
+# Get readings for dashboard
 @app.route("/readings", methods=["GET"])
 def get_readings():
-    history = list(collection.find({}, {"_id": 0}).sort("_id", -1).limit(10))
+    history = list(collection.find({}, {"_id": 0}).sort("timestamp", -1).limit(10))
     return jsonify(history)
 
 
