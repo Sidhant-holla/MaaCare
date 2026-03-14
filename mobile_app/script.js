@@ -194,25 +194,37 @@ function initChart() {
     type: "line",
     data: {
       labels: [],
-      datasets: [{
-        label: "Blood Pressure",
-        data: [],
-        borderColor: "#ff4da6",
-        backgroundColor: "rgba(255,77,166,0.08)",
-        borderWidth: 2,
-        tension: 0.3,
-        pointBackgroundColor: "#ff4da6"
-      }]
+      datasets: [
+        {
+          label: "Blood Pressure (mmHg)",
+          data: [],
+          borderColor: "#ff4da6",
+          backgroundColor: "rgba(255,77,166,0.08)",
+          borderWidth: 2,
+          tension: 0.3,
+          pointBackgroundColor: "#ff4da6"
+        },
+        {
+          label: "Glucose (mg/dL)",
+          data: [],
+          borderColor: "#c678dd",
+          backgroundColor: "rgba(198,120,221,0.08)",
+          borderWidth: 2,
+          tension: 0.3,
+          pointBackgroundColor: "#c678dd"
+        }
+      ]
     },
     options: { responsive: true }
   });
 }
 
 function updateChart(history) {
-  const labels = history.map((_, index) => `Reading ${index + 1}`);
-  const bpData = history.map(item => item.blood_pressure);
+  const reversed = [...history].reverse();
+  const labels = reversed.map((_, i) => `Reading ${i + 1}`);
   chart.data.labels = labels;
-  chart.data.datasets[0].data = bpData;
+  chart.data.datasets[0].data = reversed.map(item => item.blood_pressure);
+  chart.data.datasets[1].data = reversed.map(item => item.glucose);
   chart.update();
 }
 
