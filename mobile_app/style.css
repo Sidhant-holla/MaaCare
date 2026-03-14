@@ -256,6 +256,13 @@ button:active {
   transform: translateY(0);
 }
 
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 
 /* ─── SYMPTOMS ────────────────────────────────── */
 
@@ -404,6 +411,107 @@ h3 {
   font-size: 13px;
   color: #721c24;
   line-height: 1.5;
+}
+
+
+/* ─── PROFILE BADGE ───────────────────────────── */
+
+.profile-badge {
+  font-size: 12px;
+  color: #999;
+  padding: 6px 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-profile-btn {
+  background: none;
+  border: 1px solid #e0c0f0;
+  color: #c678dd;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin: 0;
+  width: auto;
+  margin-top: 0;
+  transition: background 0.15s;
+}
+
+.edit-profile-btn:hover {
+  background: #f8eeff;
+  transform: none;
+  box-shadow: none;
+}
+
+
+/* ─── PROFILE MODAL ───────────────────────────── */
+
+.profile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.profile-modal-box {
+  background: #fff;
+  border-radius: 18px;
+  padding: 32px 28px;
+  width: 320px;
+  max-width: 92vw;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 8px 32px rgba(255,77,166,0.18);
+}
+
+.profile-modal-box h3 {
+  font-size: 20px;
+  color: #ff4da6;
+  margin-bottom: 2px;
+}
+
+.profile-modal-box p {
+  color: #999;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.profile-modal-box label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #444;
+  margin-top: 8px;
+}
+
+.profile-modal-box input {
+  padding: 10px 12px;
+  border: 1.5px solid #e0d0f0;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.profile-modal-box input:focus {
+  border-color: #ff4da6;
+}
+
+.profile-modal-box button {
+  margin-top: 16px;
+  background: linear-gradient(135deg, #ff4da6, #c678dd);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 

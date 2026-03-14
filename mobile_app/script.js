@@ -8,6 +8,60 @@ if (!token) {
   window.location.href = "login.html";
 }
 
+let userAge = null;
+let userPregnancies = null;
+
+async function loadProfile() {
+  try {
+    const res = await fetch(`${API_URL}/profile`, { headers: authHeaders() });
+    const data = await res.json();
+    if (data.age == null || data.pregnancies == null) {
+      document.getElementById("profileModal").style.display = "flex";
+    } else {
+      userAge = data.age;
+      userPregnancies = data.pregnancies;
+      updateProfileBadge();
+    }
+  } catch {
+    document.getElementById("profileModal").style.display = "flex";
+  }
+}
+
+function updateProfileBadge() {
+  const badge = document.getElementById("profileBadge");
+  if (!badge) return;
+  badge.innerHTML = `Age ${userAge} &nbsp;·&nbsp; ${userPregnancies} prev. pregnanc${userPregnancies === 1 ? "y" : "ies"} &nbsp;<button class="edit-profile-btn" onclick="document.getElementById('profileModal').style.display='flex'">Edit</button>`;
+}
+
+async function saveProfile() {
+  const age = parseInt(document.getElementById("profileAge").value);
+  const pregnancies = parseInt(document.getElementById("profilePregnancies").value);
+  let err = false;
+  if (isNaN(age) || age < 10 || age > 60) {
+    document.getElementById("profileAgeError").textContent = "Enter age between 10 and 60";
+    err = true;
+  }
+  if (isNaN(pregnancies) || pregnancies < 0 || pregnancies > 20) {
+    document.getElementById("profilePregnanciesError").textContent = "Enter a value between 0 and 20";
+    err = true;
+  }
+  if (err) return;
+  const btn = document.querySelector("#profileModal button");
+  btn.textContent = "Saving...";
+  btn.disabled = true;
+  await fetch(`${API_URL}/profile`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ age, pregnancies })
+  });
+  userAge = age;
+  userPregnancies = pregnancies;
+  btn.textContent = "Save & Continue";
+  btn.disabled = false;
+  document.getElementById("profileModal").style.display = "none";
+  updateProfileBadge();
+}
+
 document.getElementById("usernameDisplay").textContent = username ? `Hi, ${username}` : "";
 
 function logout() {
@@ -58,12 +112,26 @@ function updatePregnancy() {
 
 document.getElementById("weeks").addEventListener("input", updatePregnancy);
 
-// Clear field errors as user types
-["pregnancies", "glucose", "bp", "weight", "height", "age"].forEach(id => {
+// Clear field errors + reset risk on input
+["glucose", "bp", "weight", "height"].forEach(id => {
   document.getElementById(id).addEventListener("input", () => {
     document.getElementById(id + "Error").textContent = "";
+    resetRisk();
   });
 });
+
+// Reset risk when symptoms change
+document.querySelectorAll(".symptom input[type=checkbox]").forEach(cb => {
+  cb.addEventListener("change", resetRisk);
+});
+
+function resetRisk() {
+  const box = document.getElementById("riskBox");
+  box.textContent = "—";
+  box.className = "risk";
+  document.getElementById("diagnosticsBox").innerHTML = "";
+  document.getElementById("alertBox").innerHTML = "";
+}
 
 
 /* ANALYZE */
@@ -73,7 +141,7 @@ function fieldError(id, msg) {
 }
 
 function clearErrors() {
-  ["pregnancies", "glucose", "bp", "weight", "height", "age"].forEach(id => {
+  ["glucose", "bp", "weight", "height"].forEach(id => {
     document.getElementById(id + "Error").textContent = "";
   });
 }
@@ -81,17 +149,12 @@ function clearErrors() {
 async function analyze() {
   clearErrors();
 
-  let pregnancies = parseFloat(document.getElementById("pregnancies").value);
   let glucose = parseFloat(document.getElementById("glucose").value);
   let bp = parseFloat(document.getElementById("bp").value);
   let weight = parseFloat(document.getElementById("weight").value);
   let height = parseFloat(document.getElementById("height").value);
-  let age = parseFloat(document.getElementById("age").value);
 
   let hasError = false;
-
-  if (isNaN(pregnancies)) { fieldError("pregnancies", "Required"); hasError = true; }
-  else if (pregnancies < 0 || pregnancies > 20) { fieldError("pregnancies", "Enter a value between 0 and 20"); hasError = true; }
 
   if (isNaN(glucose)) { fieldError("glucose", "Required"); hasError = true; }
   else if (glucose < 50 || glucose > 400) { fieldError("glucose", "Normal range is 50–400 mg/dL"); hasError = true; }
@@ -105,24 +168,32 @@ async function analyze() {
   if (isNaN(height)) { fieldError("height", "Required"); hasError = true; }
   else if (height < 1.0 || height > 2.5) { fieldError("height", "Enter a value between 1.0 and 2.5 m"); hasError = true; }
 
-  if (isNaN(age)) { fieldError("age", "Required"); hasError = true; }
-  else if (age < 10 || age > 60) { fieldError("age", "Enter a value between 10 and 60"); hasError = true; }
-
   if (hasError) return;
 
+  const age = userAge;
+  const pregnancies = userPregnancies;
   let bmi = weight / (height * height);
 
   checkSymptoms(bp);
+
+  const btn = document.getElementById("analyzeBtn");
+  btn.disabled = true;
+  btn.textContent = "Analyzing...";
 
   try {
     const response = await fetch(`${API_URL}/predict`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify({ pregnancies, glucose, bp, bmi, age, symptoms: getSymptoms() })
+      body: JSON.stringify({ glucose, bp, bmi, symptoms: getSymptoms() })
     });
 
-    if (response.status === 401) {
-      logout();
+    if (response.status === 401) { logout(); return; }
+    if (response.status === 400) {
+      document.getElementById("profileModal").style.display = "flex";
+      return;
+    }
+    if (!response.ok) {
+      document.getElementById("alertBox").innerHTML = "<div class='alert alert-danger'>Server error. Try again.</div>";
       return;
     }
 
@@ -131,7 +202,10 @@ async function analyze() {
     buildDiagnostics(data.risk, bp, glucose, bmi, age, pregnancies, getSymptoms());
     updateChart(data.history);
   } catch (error) {
-    alert("Backend not running");
+    document.getElementById("alertBox").innerHTML = "<div class='alert alert-danger'>Could not reach server. Make sure the backend is running.</div>";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Analyze Risk";
   }
 }
 
@@ -275,7 +349,11 @@ function initChart() {
 
 function updateChart(history) {
   const reversed = [...history].reverse();
-  const labels = reversed.map((_, i) => `Reading ${i + 1}`);
+  const labels = reversed.map(item => {
+    const d = new Date(item.timestamp);
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }) + " " +
+           d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  });
   chart.data.labels = labels;
   chart.data.datasets[0].data = reversed.map(item => item.blood_pressure);
   chart.data.datasets[1].data = reversed.map(item => item.glucose);
@@ -283,3 +361,4 @@ function updateChart(history) {
 }
 
 initChart();
+loadProfile();

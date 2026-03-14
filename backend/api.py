@@ -26,16 +26,18 @@ app.add_middleware(
 )
 
 class VitalsInput(BaseModel):
-    pregnancies: int
     glucose: float
     bp: float
     bmi: float
-    age: int
     symptoms: list[str] = []
 
 class UserAuth(BaseModel):
     username: str
     password: str
+
+class UserProfile(BaseModel):
+    age: int
+    pregnancies: int
 
 # load model
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -94,19 +96,36 @@ def login(user: UserAuth):
     return {"token": create_token(user.username), "username": user.username}
 
 
+@app.get("/profile")
+def get_profile(username: str = Depends(get_current_user)):
+    user = users_col.find_one({"username": username}, {"_id": 0, "age": 1, "pregnancies": 1})
+    return {"age": user.get("age"), "pregnancies": user.get("pregnancies")}
+
+
+@app.post("/profile")
+def save_profile(profile: UserProfile, username: str = Depends(get_current_user)):
+    users_col.update_one({"username": username}, {"$set": {"age": profile.age, "pregnancies": profile.pregnancies}})
+    return {"ok": True}
+
+
 @app.post("/predict")
 def predict(vitals: VitalsInput, username: str = Depends(get_current_user)):
-    pregnancies = vitals.pregnancies
+    user_doc = users_col.find_one({"username": username})
+    if not user_doc:
+        raise HTTPException(status_code=401, detail="User not found — please log in again")
+    age = user_doc.get("age")
+    pregnancies = user_doc.get("pregnancies")
+    if age is None or pregnancies is None:
+        raise HTTPException(status_code=400, detail="Profile incomplete")
     glucose = vitals.glucose
     bp = vitals.bp
     bmi = vitals.bmi
-    age = vitals.age
     symptoms = vitals.symptoms
 
     # Only override for values truly outside the model's training range
     # (Pima dataset: BP max=122, Glucose max=199, BMI max=67.1)
     # Everything else falls through to the model so combination logic applies
-    if bp >= 120 or bp < 90 or glucose >= 200:
+    if bp >= 120 or bp < 90 or glucose >= 180:
         risk = "High Risk"
         probability = 0.92
     else:
