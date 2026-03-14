@@ -1,12 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from pymongo import MongoClient
 
 app = Flask(__name__)
 CORS(app)
 
-# Temporary in-memory history for demo
-# This resets whenever the server restarts
-readings_history = []
+# Connect to MongoDB
+client = MongoClient("mongodb://localhost:27017/")
+db = client["MaaCare"]
+collection = db["Readings"]
 
 
 @app.route("/")
@@ -14,6 +16,7 @@ def home():
     return jsonify({"message": "MaaCare Backend Running"})
 
 
+# Risk calculation logic
 def calculate_risk(bp, glucose, weight):
     if bp > 140 or glucose > 150 or weight > 90:
         return "High Risk"
@@ -23,6 +26,7 @@ def calculate_risk(bp, glucose, weight):
         return "Low Risk"
 
 
+# Predict risk and store reading
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
@@ -43,11 +47,15 @@ def predict():
             "risk": risk
         }
 
-        readings_history.append(reading)
+        # Save to MongoDB
+        collection.insert_one(reading)
+
+        # Get last 10 readings
+        history = list(collection.find({}, {"_id": 0}).sort("_id", -1).limit(10))
 
         return jsonify({
             "risk": risk,
-            "history": readings_history[-10:]
+            "history": history
         })
 
     except Exception as e:
@@ -57,9 +65,11 @@ def predict():
         }), 400
 
 
+# Get previous readings
 @app.route("/readings", methods=["GET"])
 def get_readings():
-    return jsonify(readings_history[-10:])
+    history = list(collection.find({}, {"_id": 0}).sort("_id", -1).limit(10))
+    return jsonify(history)
 
 
 if __name__ == "__main__":
