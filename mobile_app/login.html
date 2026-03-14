@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MaaCare – Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body">
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+
+      <div class="auth-logo">
+        <img src="../assets/MaaCare logo.jpeg" alt="MaaCare" class="auth-logo-img">
+        <p>Maternal Health Monitor</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="tab-btn active" id="loginTabBtn" onclick="showTab('login')">Login</button>
+        <button class="tab-btn" id="signupTabBtn" onclick="showTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="loginTab">
+        <div class="input-group">
+          <label>Username</label>
+          <input type="text" id="loginUsername" placeholder="Enter your username">
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter your password">
+        </div>
+        <button class="auth-btn" onclick="login()">Login</button>
+        <p class="auth-error" id="loginError"></p>
+      </div>
+
+      <!-- SIGN UP -->
+      <div id="signupTab" style="display:none">
+        <div class="input-group">
+          <label>Username</label>
+          <input type="text" id="signupUsername" placeholder="Choose a username">
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="signupPassword" placeholder="Create a password (min 6 chars)">
+        </div>
+        <div class="input-group">
+          <label>Confirm Password</label>
+          <input type="password" id="signupConfirm" placeholder="Repeat your password">
+        </div>
+        <button class="auth-btn" onclick="signup()">Create Account</button>
+        <p class="auth-error" id="signupError"></p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SPLASH OVERLAY -->
+  <div id="splash" class="splash-overlay">
+    <img src="../assets/MaaCare logo.jpeg" alt="MaaCare" class="splash-logo-img">
+  </div>
+
+  <script src="auth.js"></script>
+</body>
+</html>

@@ -1,162 +1,120 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
-<meta charset="UTF-8">
-<title>MaaCare Maternal Health Monitor</title>
-
-<link rel="stylesheet" href="style.css">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MaaCare Maternal Health Monitor</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Auth guard — redirect before page renders
+    if (!localStorage.getItem("token")) {
+      window.location.href = "login.html";
+    }
+  </script>
 </head>
-
-<body>
+<body class="page-fade-in">
 
 <div class="app">
 
-<header>
-<h1>MaaCare Maternal Health Monitor</h1>
-<p>AI Assisted Pregnancy Risk Detection</p>
-</header>
+  <!-- HEADER -->
+  <header>
+    <div class="header-content">
+      <div class="header-brand">
+        <img src="../assets/MaaCare logo.jpeg" alt="MaaCare" class="header-logo-img">
+        <div>
+          <h1>MaaCare</h1>
+          <p>AI Assisted Pregnancy Risk Detection</p>
+        </div>
+      </div>
+      <div class="header-user">
+        <span id="usernameDisplay"></span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
 
+  <!-- PREGNANCY PROGRESS -->
+  <div class="pregnancy-card">
+    <div class="card-header-label">Pregnancy Progress</div>
+    <label>Weeks Pregnant</label>
+    <input type="number" id="weeks" min="1" max="42">
+    <span class="field-error" id="weeksError"></span>
+    <div class="progress-bar">
+      <div id="progress"></div>
+    </div>
+    <p id="weekText">Enter weeks to track pregnancy stage</p>
+  </div>
 
-<!-- PREGNANCY PROGRESS -->
+  <div class="dashboard">
 
-<div class="pregnancy-card">
+    <!-- PATIENT VITALS -->
+    <div class="card">
+      <div class="card-header-label">Patient Vitals</div>
+      <div class="card-body">
 
-<h2>Pregnancy Progress</h2>
+        <label>Pregnancies</label>
+        <input type="number" id="pregnancies" min="0" max="20" placeholder="0 – 20">
+        <span class="field-error" id="pregnanciesError"></span>
 
-<label>Weeks Pregnant</label>
-<input type="number" id="weeks" min="1" max="40">
+        <label>Glucose (mg/dL)</label>
+        <input type="number" id="glucose" min="50" max="400" placeholder="50 – 400">
+        <span class="field-error" id="glucoseError"></span>
 
-<div class="progress-bar">
-<div id="progress"></div>
-</div>
+        <label>Blood Pressure (mmHg)</label>
+        <input type="number" id="bp" min="50" max="250" placeholder="50 – 250">
+        <span class="field-error" id="bpError"></span>
 
-<p id="weekText">Enter weeks to track pregnancy stage</p>
+        <label>Weight (kg)</label>
+        <input type="number" id="weight" min="30" max="200" placeholder="30 – 200">
+        <span class="field-error" id="weightError"></span>
 
-</div>
+        <label>Height (m)</label>
+        <input type="number" step="0.01" id="height" min="1.0" max="2.5" placeholder="1.0 – 2.5">
+        <span class="field-error" id="heightError"></span>
 
+        <label>Age</label>
+        <input type="number" id="age" min="10" max="60" placeholder="10 – 60">
+        <span class="field-error" id="ageError"></span>
 
+        <h3>Symptoms</h3>
+        <div class="symptom-grid">
+          <label class="symptom"><input type="checkbox" id="headache"><span>Headache</span></label>
+          <label class="symptom"><input type="checkbox" id="blurred"><span>Blurred Vision</span></label>
+          <label class="symptom"><input type="checkbox" id="vomiting"><span>Vomiting</span></label>
+          <label class="symptom"><input type="checkbox" id="dizziness"><span>Dizziness</span></label>
+          <label class="symptom"><input type="checkbox" id="swelling"><span>Swelling</span></label>
+          <label class="symptom"><input type="checkbox" id="bleeding"><span>Bleeding</span></label>
+          <label class="symptom"><input type="checkbox" id="contractions"><span>Contractions</span></label>
+          <label class="symptom"><input type="checkbox" id="movement"><span>Reduced Baby Movement</span></label>
+          <label class="symptom"><input type="checkbox" id="fatigue"><span>Extreme Fatigue</span></label>
+        </div>
 
-<div class="dashboard">
+        <button onclick="analyze()">Analyze Risk</button>
 
-<!-- PATIENT VITALS -->
+      </div>
+    </div>
 
-<div class="card">
+    <!-- RISK RESULT -->
+    <div class="card">
+      <div class="card-header-label">Risk Result</div>
+      <div class="card-body">
+        <div id="riskBox" class="risk">Waiting for input</div>
+        <div id="alertBox"></div>
+      </div>
+    </div>
 
-<h2>Patient Vitals</h2>
+    <!-- BP CHART -->
+    <div class="card chartCard">
+      <div class="card-header-label">Blood Pressure Trend</div>
+      <div class="card-body">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
 
-<label>Pregnancies</label>
-<input type="number" id="pregnancies">
-
-<label>Glucose</label>
-<input type="number" id="glucose">
-
-<label>Blood Pressure</label>
-<input type="number" id="bp">
-
-<label>Weight (kg)</label>
-<input type="number" id="weight">
-
-<label>Height (m)</label>
-<input type="number" step="0.01" id="height">
-
-<label>Age</label>
-<input type="number" id="age">
-
-
-<h3>Symptoms</h3>
-
-<div class="symptom-grid">
-
-<label class="symptom">
-<input type="checkbox" id="headache">
-<span>Headache</span>
-</label>
-
-<label class="symptom">
-<input type="checkbox" id="blurred">
-<span>Blurred Vision</span>
-</label>
-
-<label class="symptom">
-<input type="checkbox" id="vomiting">
-<span>Vomiting</span>
-</label>
-
-<label class="symptom">
-<input type="checkbox" id="dizziness">
-<span>Dizziness</span>
-</label>
-
-<label class="symptom">
-<input type="checkbox" id="swelling">
-<span>Swelling</span>
-</label>
-
-<label class="symptom">
-<input type="checkbox" id="bleeding">
-<span>Bleeding</span>
-</label>
-
-<label class="symptom">
-<input type="checkbox" id="contractions">
-<span>Contractions</span>
-</label>
-
-<label class="symptom">
-<input type="checkbox" id="movement">
-<span>Reduced Baby Movement</span>
-</label>
-
-<label class="symptom">
-<input type="checkbox" id="fatigue">
-<span>Extreme Fatigue</span>
-</label>
-
-</div>
-
-<button onclick="analyze()">Analyze Risk</button>
-
-</div>
-
-
-
-<!-- RISK RESULT -->
-
-<div class="card">
-
-<h2>Risk Result</h2>
-
-<div id="riskBox" class="risk">
-Waiting for input
-</div>
-
-<div id="alertBox"></div>
-
-</div>
-
-
-
-<!-- BP CHART -->
-
-<div class="card chartCard">
-
-<h2>Blood Pressure Trend</h2>
-
-<canvas id="chart"></canvas>
-
-</div>
-
-</div>
-
+  </div>
 </div>
 
 <script src="script.js"></script>
-
 </body>
-
 </html>

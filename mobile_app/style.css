@@ -1,228 +1,515 @@
-body{
-
-margin:0;
-font-family:Arial;
-background:#f4f6fb;
-
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.app{
-
-max-width:1100px;
-margin:auto;
-padding:20px;
-
-}
-
-header{
-
-text-align:center;
-margin-bottom:25px;
-
-}
-
-header h1{
-
-color:#ff4da6;
-
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #fdf0f7 0%, #f0eeff 100%);
+  min-height: 100vh;
 }
 
 
-/* PREGNANCY PROGRESS */
+/* ─── HEADER ─────────────────────────────────── */
 
-.pregnancy-card{
-
-background:white;
-padding:20px;
-border-radius:12px;
-margin-bottom:20px;
-box-shadow:0 6px 15px rgba(0,0,0,0.1);
-
+header {
+  background: linear-gradient(135deg, #ff4da6 0%, #c678dd 100%);
+  box-shadow: 0 4px 20px rgba(255, 77, 166, 0.35);
+  padding: 0 24px;
+  margin-bottom: 28px;
 }
 
-.progress-bar{
-
-width:100%;
-height:18px;
-background:#eee;
-border-radius:10px;
-margin-top:10px;
-
+.header-content {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
 }
 
-#progress{
-
-height:100%;
-width:0%;
-border-radius:10px;
-transition:0.3s;
-
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-
-/* DASHBOARD */
-
-.dashboard{
-
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
-
+.header-logo-img {
+  height: 68px;
+  width: auto;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
 }
 
-.card{
-
-background:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 6px 15px rgba(0,0,0,0.1);
-
+header h1 {
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
-.chartCard{
-
-grid-column:span 2;
-
+header p {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 13px;
+  margin-top: 2px;
 }
 
-
-/* INPUTS */
-
-input{
-
-width:100%;
-padding:10px;
-margin:8px 0;
-border-radius:6px;
-border:1px solid #ccc;
-
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-button{
-
-background:#ff4da6;
-color:white;
-border:none;
-padding:12px;
-width:100%;
-border-radius:8px;
-font-size:16px;
-cursor:pointer;
-margin-top:10px;
-
+.header-user span {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
 }
 
-button:hover{
+.logout-btn {
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  padding: 7px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  width: auto;
+  margin: 0;
+  transition: background 0.2s;
+}
 
-background:#ff1a8c;
-
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.32);
+  transform: none;
+  box-shadow: none;
 }
 
 
-/* SYMPTOMS GRID */
+/* ─── LAYOUT ──────────────────────────────────── */
 
-.symptom-grid{
-
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-margin-top:10px;
-
-}
-
-.symptom{
-
-display:flex;
-align-items:flex-start;
-gap:8px;
-
-}
-
-.symptom input{
-
-margin-top:4px;
-
-}
-
-.symptom span{
-
-line-height:1.2;
-
+.app {
+  max-width: 1100px;
+  margin: auto;
+  padding: 0 20px 40px;
 }
 
 
-/* RISK BOX */
+/* ─── PREGNANCY CARD ──────────────────────────── */
 
-.risk{
-
-padding:30px;
-text-align:center;
-font-size:22px;
-border-radius:10px;
-font-weight:bold;
-
+.pregnancy-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+  margin-bottom: 20px;
+  overflow: hidden;
 }
 
-.low{
-
-background:#d4edda;
-color:#155724;
-
+.pregnancy-card > label,
+.pregnancy-card > input,
+.pregnancy-card > p {
+  display: block;
+  padding: 0 20px;
 }
 
-.medium{
-
-background:#fff3cd;
-color:#856404;
-
+.pregnancy-card > label {
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
-.high{
-
-background:#f8d7da;
-color:#721c24;
-
+.pregnancy-card > input {
+  margin: 6px 20px 0;
+  width: calc(100% - 40px);
 }
 
-
-/* ALERT */
-
-.alert{
-
-margin-top:15px;
-padding:12px;
-border-radius:8px;
-font-weight:bold;
-
+.pregnancy-card > p {
+  color: #888;
+  font-size: 14px;
+  padding-bottom: 20px;
+  margin-top: 10px;
 }
 
-.alert-warning{
-
-background:#fff3cd;
-
+.card-header-label {
+  background: linear-gradient(135deg, #ff4da6 0%, #c678dd 100%);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 12px 20px;
 }
 
-.alert-danger{
-
-background:#f8d7da;
-
+.card-body {
+  padding: 20px;
 }
 
 
-/* MOBILE */
+/* ─── PROGRESS BAR ────────────────────────────── */
 
-@media(max-width:800px){
-
-.dashboard{
-
-grid-template-columns:1fr;
-
+.progress-bar {
+  width: calc(100% - 40px);
+  height: 14px;
+  background: #f0f0f0;
+  border-radius: 10px;
+  margin: 10px 20px 0;
+  overflow: hidden;
 }
 
-.chartCard{
-
-grid-column:span 1;
-
+#progress {
+  height: 100%;
+  width: 0%;
+  border-radius: 10px;
+  transition: width 0.4s ease, background 0.4s ease;
 }
 
+
+/* ─── DASHBOARD GRID ──────────────────────────── */
+
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.chartCard {
+  grid-column: span 2;
+}
+
+
+/* ─── INPUTS ──────────────────────────────────── */
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-top: 14px;
+  margin-bottom: 5px;
+}
+
+input[type="number"],
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 2px solid #eee;
+  font-size: 14px;
+  color: #333;
+  transition: border-color 0.2s;
+  background: #fafafa;
+}
+
+input:focus {
+  outline: none;
+  border-color: #ff4da6;
+  background: white;
+}
+
+input::placeholder {
+  color: #bbb;
+  font-size: 13px;
+}
+
+.field-error {
+  display: block;
+  color: #dc3545;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 3px;
+  min-height: 16px;
+}
+
+button {
+  background: linear-gradient(135deg, #ff4da6, #c678dd);
+  color: white;
+  border: none;
+  padding: 13px;
+  width: 100%;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 18px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 77, 166, 0.4);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+
+/* ─── SYMPTOMS ────────────────────────────────── */
+
+h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-top: 18px;
+  margin-bottom: 10px;
+}
+
+.symptom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.symptom {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  color: #444;
+  cursor: pointer;
+}
+
+.symptom input[type="checkbox"] {
+  width: auto;
+  margin-top: 2px;
+  accent-color: #ff4da6;
+}
+
+
+/* ─── RISK BOX ────────────────────────────────── */
+
+.risk {
+  padding: 32px 20px;
+  text-align: center;
+  font-size: 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  transition: all 0.35s ease;
+  background: #f4f6fb;
+  color: #999;
+}
+
+.low {
+  background: linear-gradient(135deg, #d4edda, #b8e6c4);
+  color: #155724;
+}
+
+.medium {
+  background: linear-gradient(135deg, #fff3cd, #ffe69c);
+  color: #856404;
+}
+
+.high {
+  background: linear-gradient(135deg, #f8d7da, #f5b8bc);
+  color: #721c24;
+}
+
+
+/* ─── ALERTS ──────────────────────────────────── */
+
+.alert {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.alert-warning {
+  background: #fff3cd;
+  color: #856404;
+  border-left: 4px solid #ffc107;
+}
+
+.alert-danger {
+  background: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+
+/* ─── AUTH PAGE ───────────────────────────────── */
+
+.auth-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ff4da6 0%, #c678dd 100%);
+}
+
+.auth-wrapper {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+}
+
+.auth-card {
+  background: white;
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+}
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.auth-logo-img {
+  width: 160px;
+  margin-bottom: 8px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.auth-logo p {
+  color: #aaa;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.auth-tabs {
+  display: flex;
+  background: #f4f6fb;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #aaa;
+  margin: 0;
+  width: auto;
+  transition: all 0.2s;
+  transform: none;
+  box-shadow: none;
+}
+
+.tab-btn:hover {
+  transform: none;
+  box-shadow: none;
+  color: #ff4da6;
+}
+
+.tab-btn.active {
+  background: white;
+  color: #ff4da6;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+  margin-bottom: 4px;
+}
+
+.input-group label {
+  text-transform: none;
+  font-size: 13px;
+  letter-spacing: 0;
+  margin-top: 10px;
+}
+
+.auth-btn {
+  margin-top: 20px;
+}
+
+.auth-error {
+  color: #dc3545;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 10px;
+  min-height: 18px;
+  font-weight: 500;
+}
+
+
+/* ─── SPLASH OVERLAY ─────────────────────────── */
+
+.splash-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #ff4da6, #c678dd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.splash-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.splash-overlay.fade-out {
+  opacity: 0;
+}
+
+.splash-logo-img {
+  width: 260px;
+  animation: splash-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes splash-pop {
+  from { transform: scale(0.3); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+
+/* ─── PAGE FADE-IN (index.html) ───────────────── */
+
+@keyframes page-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+body.page-fade-in {
+  animation: page-fade-in 0.5s ease forwards;
+}
+
+
+/* ─── MOBILE ──────────────────────────────────── */
+
+@media (max-width: 800px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .chartCard {
+    grid-column: span 1;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
 }
