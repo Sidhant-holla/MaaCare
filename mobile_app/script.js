@@ -2,106 +2,246 @@ const API_URL = "http://127.0.0.1:5000";
 
 let chart;
 
-// Main function triggered when "Analyze Risk" button is clicked
-async function analyze() {
-  let age = document.getElementById("age").value;
-  let bp = document.getElementById("bp").value;
-  let glucose = document.getElementById("glucose").value;
-  let weight = document.getElementById("weight").value;
 
-  // Basic validation
-  if (!age || !bp || !glucose || !weight) {
-    alert("Please fill all vitals");
-    return;
-  }
 
-  try {
-    const response = await fetch(`${API_URL}/predict`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        age,
-        bp,
-        glucose,
-        weight
-      })
-    });
+/* PREGNANCY PROGRESS */
 
-    const data = await response.json();
+function updatePregnancy(){
 
-    if (!response.ok) {
-      throw new Error(data.error || "Request failed");
-    }
+let weeks=document.getElementById("weeks").value;
+let progressBar=document.getElementById("progress");
 
-    displayRisk(data.risk);
-    updateChart(data.history);
+let progress=(weeks/40)*100;
 
-  } catch (error) {
-    console.error(error);
-    alert("Backend not running or request failed");
-  }
+progressBar.style.width=progress+"%";
+
+let stage="";
+
+if(weeks<=12){
+
+progressBar.style.background="#ff4da6";
+stage="First Trimester";
+
 }
 
-// Display result in dashboard
-function displayRisk(risk) {
-  let box = document.getElementById("riskBox");
-  box.innerText = risk;
+else if(weeks<=26){
 
-  if (risk === "High Risk") {
-    box.className = "risk high";
-  } else if (risk === "Medium Risk") {
-    box.className = "risk medium";
-  } else {
-    box.className = "risk low";
-  }
+progressBar.style.background="#ffa500";
+stage="Second Trimester";
+
 }
 
-// Chart initialization
-function initChart() {
-  const ctx = document.getElementById("chart").getContext("2d");
+else{
 
-  chart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: [],
-      datasets: [{
-        label: "Blood Pressure Trend",
-        data: [],
-        borderWidth: 2,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: true
-        }
-      }
-    }
-  });
+progressBar.style.background="#4CAF50";
+stage="Third Trimester";
+
 }
 
-function updateChart(history) {
-  const labels = history.map((item, index) => `Reading ${index + 1}`);
-  const bpData = history.map((item) => item.bp);
+document.getElementById("weekText").innerText=
+"Week "+weeks+" • "+stage;
 
-  chart.data.labels = labels;
-  chart.data.datasets[0].data = bpData;
-  chart.update();
 }
 
-async function loadHistory() {
-  try {
-    const response = await fetch(`${API_URL}/readings`);
-    const data = await response.json();
-    updateChart(data);
-  } catch (error) {
-    console.log("No history yet");
-  }
+document.getElementById("weeks").addEventListener("input",updatePregnancy);
+
+
+
+
+/* ANALYZE */
+
+async function analyze(){
+
+let pregnancies=document.getElementById("pregnancies").value;
+let glucose=document.getElementById("glucose").value;
+let bp=document.getElementById("bp").value;
+let weight=document.getElementById("weight").value;
+let height=document.getElementById("height").value;
+let age=document.getElementById("age").value;
+
+if(!pregnancies || !glucose || !bp || !weight || !height || !age){
+
+alert("Please fill all vitals");
+return;
+
 }
+
+let bmi=weight/(height*height);
+
+checkSymptoms(bp);
+
+try{
+
+const response=await fetch(`${API_URL}/predict`,{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+pregnancies,
+glucose,
+bp,
+bmi,
+age
+
+})
+
+});
+
+const data=await response.json();
+
+displayRisk(data.risk);
+updateChart(data.history);
+
+}
+
+catch(error){
+
+alert("Backend not running");
+
+}
+
+}
+
+
+
+/* RISK DISPLAY */
+
+function displayRisk(risk){
+
+let box=document.getElementById("riskBox");
+
+box.innerText=risk;
+
+box.className="risk";
+
+if(risk==="High Risk") box.classList.add("high");
+else if(risk==="Medium Risk") box.classList.add("medium");
+else box.classList.add("low");
+
+}
+
+
+
+/* SYMPTOM LOGIC */
+
+function checkSymptoms(bp){
+
+let headache=document.getElementById("headache").checked;
+let blurred=document.getElementById("blurred").checked;
+let vomiting=document.getElementById("vomiting").checked;
+let dizziness=document.getElementById("dizziness").checked;
+let swelling=document.getElementById("swelling").checked;
+let bleeding=document.getElementById("bleeding").checked;
+let contractions=document.getElementById("contractions").checked;
+let movement=document.getElementById("movement").checked;
+let fatigue=document.getElementById("fatigue").checked;
+
+let alertBox=document.getElementById("alertBox");
+
+alertBox.innerHTML="";
+
+if(headache && blurred && bp>140){
+
+alertBox.innerHTML=
+"<div class='alert alert-danger'>Possible signs of preeclampsia detected. Please consult a doctor if symptoms persist.</div>";
+
+}
+
+else if(contractions && movement){
+
+alertBox.innerHTML=
+"<div class='alert alert-danger'>Possible early labor or fetal distress symptoms. Seek medical advice immediately.</div>";
+
+}
+
+else if(swelling && headache){
+
+alertBox.innerHTML=
+"<div class='alert alert-warning'>Possible hypertension related symptoms. Monitor BP and consult a doctor if needed.</div>";
+
+}
+
+else if(vomiting && dizziness){
+
+alertBox.innerHTML=
+"<div class='alert alert-warning'>Possible dehydration or anemia symptoms.</div>";
+
+}
+
+else if(fatigue && dizziness){
+
+alertBox.innerHTML=
+"<div class='alert alert-warning'>Possible anemia or nutritional deficiency.</div>";
+
+}
+
+else if(bleeding){
+
+alertBox.innerHTML=
+"<div class='alert alert-danger'>Bleeding detected. Immediate medical attention recommended.</div>";
+
+}
+
+}
+
+
+
+
+/* CHART */
+
+function initChart(){
+
+const ctx=document.getElementById("chart").getContext("2d");
+
+chart=new Chart(ctx,{
+
+type:"line",
+
+data:{
+
+labels:[],
+
+datasets:[{
+
+label:"Blood Pressure",
+
+data:[],
+borderWidth:2,
+tension:0.3
+
+}]
+
+},
+
+options:{
+responsive:true
+}
+
+});
+
+}
+
+
+
+function updateChart(history){
+
+const labels=history.map((item,index)=>`Reading ${index+1}`);
+const bpData=history.map(item=>item.bp);
+
+chart.data.labels=labels;
+chart.data.datasets[0].data=bpData;
+
+chart.update();
+
+}
+
+
 
 initChart();
-loadHistory();

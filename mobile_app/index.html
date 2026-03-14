@@ -2,8 +2,14 @@
 <html>
 
 <head>
-<title>MaaCare Dashboard</title>
+
+<meta charset="UTF-8">
+<title>MaaCare Maternal Health Monitor</title>
+
 <link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
@@ -11,43 +17,135 @@
 <div class="app">
 
 <header>
-<h1>MaaCare</h1>
-<p>Maternal Health Monitoring</p>
+<h1>MaaCare Maternal Health Monitor</h1>
+<p>AI Assisted Pregnancy Risk Detection</p>
 </header>
+
+
+<!-- PREGNANCY PROGRESS -->
+
+<div class="pregnancy-card">
+
+<h2>Pregnancy Progress</h2>
+
+<label>Weeks Pregnant</label>
+<input type="number" id="weeks" min="1" max="40">
+
+<div class="progress-bar">
+<div id="progress"></div>
+</div>
+
+<p id="weekText">Enter weeks to track pregnancy stage</p>
+
+</div>
+
+
 
 <div class="dashboard">
 
+<!-- PATIENT VITALS -->
+
 <div class="card">
 
-<h2>Enter Patient Vitals</h2>
+<h2>Patient Vitals</h2>
 
-<input id="age" placeholder="Age">
+<label>Pregnancies</label>
+<input type="number" id="pregnancies">
 
-<input id="bp" placeholder="Blood Pressure">
+<label>Glucose</label>
+<input type="number" id="glucose">
 
-<input id="glucose" placeholder="Glucose">
+<label>Blood Pressure</label>
+<input type="number" id="bp">
 
-<input id="weight" placeholder="Weight">
+<label>Weight (kg)</label>
+<input type="number" id="weight">
+
+<label>Height (m)</label>
+<input type="number" step="0.01" id="height">
+
+<label>Age</label>
+<input type="number" id="age">
+
+
+<h3>Symptoms</h3>
+
+<div class="symptom-grid">
+
+<label class="symptom">
+<input type="checkbox" id="headache">
+<span>Headache</span>
+</label>
+
+<label class="symptom">
+<input type="checkbox" id="blurred">
+<span>Blurred Vision</span>
+</label>
+
+<label class="symptom">
+<input type="checkbox" id="vomiting">
+<span>Vomiting</span>
+</label>
+
+<label class="symptom">
+<input type="checkbox" id="dizziness">
+<span>Dizziness</span>
+</label>
+
+<label class="symptom">
+<input type="checkbox" id="swelling">
+<span>Swelling</span>
+</label>
+
+<label class="symptom">
+<input type="checkbox" id="bleeding">
+<span>Bleeding</span>
+</label>
+
+<label class="symptom">
+<input type="checkbox" id="contractions">
+<span>Contractions</span>
+</label>
+
+<label class="symptom">
+<input type="checkbox" id="movement">
+<span>Reduced Baby Movement</span>
+</label>
+
+<label class="symptom">
+<input type="checkbox" id="fatigue">
+<span>Extreme Fatigue</span>
+</label>
+
+</div>
 
 <button onclick="analyze()">Analyze Risk</button>
 
 </div>
 
 
-<div class="card">
 
-<h2>Risk Prediction</h2>
-
-<div id="riskBox" class="risk low">
-Low Risk
-</div>
-
-</div>
-
+<!-- RISK RESULT -->
 
 <div class="card">
 
-<h2>Vitals Trend</h2>
+<h2>Risk Result</h2>
+
+<div id="riskBox" class="risk">
+Waiting for input
+</div>
+
+<div id="alertBox"></div>
+
+</div>
+
+
+
+<!-- BP CHART -->
+
+<div class="card chartCard">
+
+<h2>Blood Pressure Trend</h2>
 
 <canvas id="chart"></canvas>
 
@@ -57,8 +155,8 @@ Low Risk
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
 
 </body>
+
 </html>
