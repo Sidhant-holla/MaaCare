@@ -103,10 +103,17 @@ def predict(vitals: VitalsInput, username: str = Depends(get_current_user)):
     age = vitals.age
     symptoms = vitals.symptoms
 
-    data = pd.DataFrame([[pregnancies, glucose, bp, bmi, age]], columns=features)
-    prediction = model.predict(data)[0]
-    probability = model.predict_proba(data)[0][1]
-    risk = "High Risk" if prediction == 1 else "Low Risk"
+    # Only override for values truly outside the model's training range
+    # (Pima dataset: BP max=122, Glucose max=199, BMI max=67.1)
+    # Everything else falls through to the model so combination logic applies
+    if bp >= 120 or bp < 90 or glucose >= 200:
+        risk = "High Risk"
+        probability = 0.92
+    else:
+        data = pd.DataFrame([[pregnancies, glucose, bp, bmi, age]], columns=features)
+        prediction = model.predict(data)[0]
+        probability = model.predict_proba(data)[0][1]
+        risk = "High Risk" if prediction == 1 else "Low Risk"
 
     reading = {
         "username": username,

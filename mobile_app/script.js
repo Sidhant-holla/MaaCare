@@ -128,6 +128,7 @@ async function analyze() {
 
     const data = await response.json();
     displayRisk(data.risk);
+    buildDiagnostics(data.risk, bp, glucose, bmi, age, pregnancies, getSymptoms());
     updateChart(data.history);
   } catch (error) {
     alert("Backend not running");
@@ -144,6 +145,59 @@ function displayRisk(risk) {
   if (risk === "High Risk") box.classList.add("high");
   else if (risk === "Medium Risk") box.classList.add("medium");
   else box.classList.add("low");
+}
+
+
+/* DIAGNOSTICS */
+
+function buildDiagnostics(risk, bp, glucose, bmi, age, pregnancies, symptoms) {
+  const reasons = [];
+
+  if (bp >= 140)          reasons.push(`🔴 Blood pressure (${bp} mmHg) is critically high — hypertension threshold in pregnancy`);
+  else if (bp >= 120)     reasons.push(`🟡 Blood pressure (${bp} mmHg) is elevated above normal`);
+  else if (bp < 90)       reasons.push(`🔴 Blood pressure (${bp} mmHg) is critically low — hypotension in pregnancy`);
+  else if (bp < 100)      reasons.push(`🟡 Blood pressure (${bp} mmHg) is on the lower side — monitor closely`);
+
+  if (glucose >= 180)     reasons.push(`🔴 Glucose (${glucose} mg/dL) is in the diabetic range`);
+  else if (glucose >= 140) reasons.push(`🟡 Glucose (${glucose} mg/dL) is above normal — pre-diabetic range`);
+
+  if (bmi >= 40)          reasons.push(`🔴 BMI (${bmi.toFixed(1)}) indicates severe obesity — high pregnancy risk`);
+  else if (bmi >= 30)     reasons.push(`🟡 BMI (${bmi.toFixed(1)}) is in the obese range`);
+
+  if (age >= 35)          reasons.push(`🟡 Age ${age} is considered advanced maternal age`);
+
+  if (pregnancies >= 6)   reasons.push(`🔴 ${pregnancies} previous pregnancies — grand multipara carries higher risk`);
+  else if (pregnancies >= 4) reasons.push(`🟡 ${pregnancies} previous pregnancies is on the higher side`);
+
+  const symptomLabels = {
+    headache: "severe headache", blurred: "blurred vision", vomiting: "vomiting",
+    dizziness: "dizziness", swelling: "swelling", bleeding: "vaginal bleeding",
+    contractions: "contractions", movement: "reduced baby movement", fatigue: "extreme fatigue"
+  };
+  const seriousSymptoms = new Set(["bleeding", "contractions", "movement"]);
+  const activeSymptoms = symptoms.filter(s => symptomLabels[s]);
+  const hasSerious = activeSymptoms.some(s => seriousSymptoms.has(s));
+
+  let html = `<div class="diagnostics-box">`;
+  html += `<div class="diag-title">Diagnostics</div>`;
+
+  if (reasons.length === 0 && risk === "Low Risk") {
+    html += `<div class="diag-good">✅ All key vitals are within normal range.</div>`;
+  } else {
+    html += `<ul class="diag-list">${reasons.map(r => `<li>${r}</li>`).join("")}</ul>`;
+  }
+
+  if (activeSymptoms.length > 0) {
+    const listed = activeSymptoms.map(s => symptomLabels[s]).join(", ");
+    if (risk !== "Low Risk" || hasSerious) {
+      html += `<div class="diag-urgent">🚨 Symptoms reported: <strong>${listed}</strong>. Please consult a doctor as soon as possible.</div>`;
+    } else {
+      html += `<div class="diag-note">⚠️ Vitals are low risk, but you've reported: <strong>${listed}</strong>. Wait and watch — consult a doctor if symptoms persist or worsen.</div>`;
+    }
+  }
+
+  html += `</div>`;
+  document.getElementById("diagnosticsBox").innerHTML = html;
 }
 
 
