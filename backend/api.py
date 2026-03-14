@@ -2,9 +2,12 @@ from fastapi import FastAPI
 import joblib
 import pandas as pd
 from pathlib import Path
+from pymongo import MongoClient
+from datetime import datetime
 
 app = FastAPI()
 
+# load model
 BASE_DIR = Path(__file__).resolve().parent.parent
 model_path = BASE_DIR / "ai_model" / "pregnancy_risk_model.pkl"
 
@@ -12,20 +15,66 @@ model = joblib.load(model_path)
 
 features = ["Pregnancies","Glucose","BloodPressure","BMI","Age"]
 
+# MongoDB connection
+client = MongoClient("mongodb://localhost:27017/")
+db = client["MaaCare"]
+collection = db["Readings"]
+
+
 @app.get("/")
 def home():
     return {"message": "MaaCare AI API running"}
 
-@app.post("/predict")
-def predict(pregnancies:int, glucose:int, bp:int, bmi:float, age:int):
 
+@app.post("/predict")
+def predict(
+    pregnancies:int,
+    glucose:float,
+    bp:float,
+    bmi:float,
+    age:int,
+    symptoms:list[str] = []
+):
+
+    # ML prediction
     data = pd.DataFrame([[pregnancies,glucose,bp,bmi,age]], columns=features)
 
-    prediction = model.predict(data)
+    prediction = model.predict(data)[0]
+    probability = model.predict_proba(data)[0][1]
 
-    if prediction[0] == 1:
+    if prediction == 1:
         risk = "High Risk"
     else:
         risk = "Low Risk"
 
-    return {"pregnancy_risk": risk}
+    # Save reading
+    reading = {
+        "pregnancies": pregnancies,
+        "glucose": glucose,
+        "blood_pressure": bp,
+        "bmi": bmi,
+        "age": age,
+        "symptoms": symptoms,
+        "risk": risk,
+        "risk_probability": float(probability),
+        "timestamp": datetime.utcnow()
+    }
+
+    collection.insert_one(reading)
+
+    # Get history
+    history = list(collection.find({}, {"_id":0}).sort("timestamp",-1).limit(10))
+
+    return {
+        "risk": risk,
+        "risk_probability": round(probability*100,2),
+        "history": history
+    }
+
+
+@app.get("/readings")
+def get_readings():
+
+    history = list(collection.find({}, {"_id":0}).sort("timestamp",-1).limit(10))
+
+    return history
