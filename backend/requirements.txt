@@ -1,2 +1,7 @@
-Flask
-flask-cors
+fastapi
+uvicorn
+pymongo
+joblib
+pandas
+scikit-learn
+pydantic

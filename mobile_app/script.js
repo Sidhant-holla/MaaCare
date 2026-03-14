@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = "http://127.0.0.1:8000";
 
 let chart;
 
@@ -88,7 +88,8 @@ pregnancies,
 glucose,
 bp,
 bmi,
-age
+age,
+symptoms:getSymptoms()
 
 })
 
@@ -130,6 +131,11 @@ else box.classList.add("low");
 
 
 /* SYMPTOM LOGIC */
+
+function getSymptoms(){
+let ids=["headache","blurred","vomiting","dizziness","swelling","bleeding","contractions","movement","fatigue"];
+return ids.filter(id=>document.getElementById(id).checked);
+}
 
 function checkSymptoms(bp){
 
@@ -233,7 +239,7 @@ responsive:true
 function updateChart(history){
 
 const labels=history.map((item,index)=>`Reading ${index+1}`);
-const bpData=history.map(item=>item.bp);
+const bpData=history.map(item=>item.blood_pressure);
 
 chart.data.labels=labels;
 chart.data.datasets[0].data=bpData;

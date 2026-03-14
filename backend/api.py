@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import joblib
 import pandas as pd
 from pathlib import Path
@@ -6,6 +8,21 @@ from pymongo import MongoClient
 from datetime import datetime
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class VitalsInput(BaseModel):
+    pregnancies: int
+    glucose: float
+    bp: float
+    bmi: float
+    age: int
+    symptoms: list[str] = []
 
 # load model
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,14 +44,13 @@ def home():
 
 
 @app.post("/predict")
-def predict(
-    pregnancies:int,
-    glucose:float,
-    bp:float,
-    bmi:float,
-    age:int,
-    symptoms:list[str] = []
-):
+def predict(vitals: VitalsInput):
+    pregnancies = vitals.pregnancies
+    glucose = vitals.glucose
+    bp = vitals.bp
+    bmi = vitals.bmi
+    age = vitals.age
+    symptoms = vitals.symptoms
 
     # ML prediction
     data = pd.DataFrame([[pregnancies,glucose,bp,bmi,age]], columns=features)
