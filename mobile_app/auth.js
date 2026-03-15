@@ -1,6 +1,6 @@
 const API_URL = "http://127.0.0.1:8000";
 
-// Already logged in → go straight to dashboard
+// redirect if already logged in
 if (localStorage.getItem("token")) {
   window.location.href = "index.html";
 }

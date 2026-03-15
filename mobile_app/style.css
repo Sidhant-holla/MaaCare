@@ -11,7 +11,7 @@ body {
 }
 
 
-/* ─── HEADER ─────────────────────────────────── */
+/* Header */
 
 header {
   background: linear-gradient(135deg, #ff4da6 0%, #c678dd 100%);
@@ -87,7 +87,7 @@ header p {
 }
 
 
-/* ─── LAYOUT ──────────────────────────────────── */
+/* Layout */
 
 .app {
   max-width: 1100px;
@@ -96,7 +96,7 @@ header p {
 }
 
 
-/* ─── PREGNANCY CARD ──────────────────────────── */
+/* Pregnancy Card */
 
 .pregnancy-card {
   background: white;
@@ -148,7 +148,7 @@ header p {
 }
 
 
-/* ─── PROGRESS BAR ────────────────────────────── */
+/* Progress Bar */
 
 .progress-bar {
   width: calc(100% - 40px);
@@ -167,7 +167,7 @@ header p {
 }
 
 
-/* ─── DASHBOARD GRID ──────────────────────────── */
+/* Dashboard Grid */
 
 .dashboard {
   display: grid;
@@ -187,7 +187,7 @@ header p {
 }
 
 
-/* ─── INPUTS ──────────────────────────────────── */
+/* Inputs */
 
 label {
   display: block;
@@ -264,7 +264,7 @@ button:disabled {
 }
 
 
-/* ─── SYMPTOMS ────────────────────────────────── */
+/* Symptoms */
 
 h3 {
   font-size: 13px;
@@ -298,7 +298,7 @@ h3 {
 }
 
 
-/* ─── RISK BOX ────────────────────────────────── */
+/* Risk Box */
 
 .risk {
   padding: 32px 20px;
@@ -327,7 +327,7 @@ h3 {
 }
 
 
-/* ─── ALERTS ──────────────────────────────────── */
+/* Alerts */
 
 .alert {
   margin-top: 14px;
@@ -351,7 +351,7 @@ h3 {
 }
 
 
-/* ─── DIAGNOSTICS ─────────────────────────────── */
+/* Diagnostics */
 
 .diagnostics-box {
   margin-top: 16px;
@@ -414,7 +414,7 @@ h3 {
 }
 
 
-/* ─── PROFILE BADGE ───────────────────────────── */
+/* Profile Badge */
 
 .profile-badge {
   font-size: 12px;
@@ -447,7 +447,7 @@ h3 {
 }
 
 
-/* ─── PROFILE MODAL ───────────────────────────── */
+/* Profile Modal */
 
 .profile-modal-overlay {
   position: fixed;
@@ -515,7 +515,7 @@ h3 {
 }
 
 
-/* ─── AUTH PAGE ───────────────────────────────── */
+/* Auth Page */
 
 .auth-body {
   display: flex;
@@ -620,7 +620,7 @@ h3 {
 }
 
 
-/* ─── SPLASH OVERLAY ─────────────────────────── */
+/* Splash Overlay */
 
 .splash-overlay {
   position: fixed;
@@ -655,7 +655,7 @@ h3 {
 }
 
 
-/* ─── PAGE FADE-IN (index.html) ───────────────── */
+/* Page Fade-In */
 
 @keyframes page-fade-in {
   from { opacity: 0; }
@@ -667,7 +667,7 @@ body.page-fade-in {
 }
 
 
-/* ─── MOBILE ──────────────────────────────────── */
+/* Mobile */
 
 @media (max-width: 800px) {
   .dashboard {

@@ -9,8 +9,9 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta, timezone
 import jwt
 import bcrypt
+import os
 
-SECRET_KEY = "maacare-secret-2026"
+SECRET_KEY = os.environ.get("MAACARE_SECRET", "dev-only-fallback")
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = 24
 
@@ -27,8 +28,11 @@ app.add_middleware(
 
 class VitalsInput(BaseModel):
     glucose: float
-    bp: float
+    systolic_bp: float
+    diastolic_bp: float
     bmi: float
+    heart_rate: float
+    body_temp: float
     symptoms: list[str] = []
 
 class UserAuth(BaseModel):
@@ -39,7 +43,6 @@ class UserProfile(BaseModel):
     age: int
     pregnancies: int
 
-# load model
 BASE_DIR = Path(__file__).resolve().parent.parent
 model_path = BASE_DIR / "ai_model" / "maternal_risk_model.pkl"
 model = joblib.load(model_path)
@@ -54,7 +57,6 @@ features = [
     "BodyTemp"
 ]
 
-# MongoDB
 client = MongoClient("mongodb://localhost:27017/")
 db = client["MaaCare"]
 collection = db["Readings"]
@@ -130,28 +132,27 @@ def predict(vitals: VitalsInput, username: str = Depends(get_current_user)):
     if age is None or pregnancies is None:
         raise HTTPException(status_code=400, detail="Profile incomplete")
 
-    data = pd.DataFrame([[
-        age,
-        pregnancies,
-        vitals.glucose,
-        vitals.systolic_bp,
-        vitals.diastolic_bp,
-        vitals.bmi,
-        vitals.heart_rate,
-        vitals.body_temp
-    ]], columns=features)
+    sbp  = vitals.systolic_bp
+    dbp  = vitals.diastolic_bp
+    gluc = vitals.glucose
+    temp = vitals.body_temp
+    hr   = vitals.heart_rate
 
-    prediction = model.predict(data)[0]
-    probabilities = model.predict_proba(data)[0]
-
-    risk_map = {
-        0: "Low Risk",
-        1: "Medium Risk",
-        2: "High Risk"
-    }
-
-    risk = risk_map[prediction]
-    probability = float(max(probabilities))
+    if sbp >= 160 or sbp < 90 or dbp >= 110 or gluc >= 180 or temp >= 100.4:
+        risk = "High Risk"
+        probability = 0.92
+    elif sbp >= 140 or dbp >= 90 or gluc >= 140 or temp >= 99.5 or hr >= 100:
+        risk = "Medium Risk"
+        probability = 0.65
+    else:
+        data = pd.DataFrame([[
+            age, pregnancies, gluc, sbp, dbp, vitals.bmi, hr, temp
+        ]], columns=features)
+        prediction = model.predict(data)[0]
+        probabilities = model.predict_proba(data)[0]
+        risk_map = {0: "Low Risk", 1: "Medium Risk", 2: "High Risk"}
+        risk = risk_map[prediction]
+        probability = float(max(probabilities))
 
     reading = {
         "username": username,
