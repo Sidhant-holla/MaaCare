@@ -41,9 +41,18 @@ class UserProfile(BaseModel):
 
 # load model
 BASE_DIR = Path(__file__).resolve().parent.parent
-model_path = BASE_DIR / "ai_model" / "pregnancy_risk_model.pkl"
+model_path = BASE_DIR / "ai_model" / "maternal_risk_model.pkl"
 model = joblib.load(model_path)
-features = ["Pregnancies", "Glucose", "BloodPressure", "BMI", "Age"]
+features = [
+    "Age",
+    "Pregnancies",
+    "Glucose",
+    "SystolicBP",
+    "DiastolicBP",
+    "BMI",
+    "HeartRate",
+    "BodyTemp"
+]
 
 # MongoDB
 client = MongoClient("mongodb://localhost:27017/")
@@ -110,45 +119,63 @@ def save_profile(profile: UserProfile, username: str = Depends(get_current_user)
 
 @app.post("/predict")
 def predict(vitals: VitalsInput, username: str = Depends(get_current_user)):
+
     user_doc = users_col.find_one({"username": username})
     if not user_doc:
-        raise HTTPException(status_code=401, detail="User not found — please log in again")
+        raise HTTPException(status_code=401, detail="User not found")
+
     age = user_doc.get("age")
     pregnancies = user_doc.get("pregnancies")
+
     if age is None or pregnancies is None:
         raise HTTPException(status_code=400, detail="Profile incomplete")
-    glucose = vitals.glucose
-    bp = vitals.bp
-    bmi = vitals.bmi
-    symptoms = vitals.symptoms
 
-    # Only override for values truly outside the model's training range
-    # (Pima dataset: BP max=122, Glucose max=199, BMI max=67.1)
-    # Everything else falls through to the model so combination logic applies
-    if bp >= 120 or bp < 90 or glucose >= 180:
-        risk = "High Risk"
-        probability = 0.92
-    else:
-        data = pd.DataFrame([[pregnancies, glucose, bp, bmi, age]], columns=features)
-        prediction = model.predict(data)[0]
-        probability = model.predict_proba(data)[0][1]
-        risk = "High Risk" if prediction == 1 else "Low Risk"
+    data = pd.DataFrame([[
+        age,
+        pregnancies,
+        vitals.glucose,
+        vitals.systolic_bp,
+        vitals.diastolic_bp,
+        vitals.bmi,
+        vitals.heart_rate,
+        vitals.body_temp
+    ]], columns=features)
+
+    prediction = model.predict(data)[0]
+    probabilities = model.predict_proba(data)[0]
+
+    risk_map = {
+        0: "Low Risk",
+        1: "Medium Risk",
+        2: "High Risk"
+    }
+
+    risk = risk_map[prediction]
+    probability = float(max(probabilities))
 
     reading = {
         "username": username,
         "pregnancies": pregnancies,
-        "glucose": glucose,
-        "blood_pressure": bp,
-        "bmi": round(bmi, 2),
         "age": age,
-        "symptoms": symptoms,
+        "glucose": vitals.glucose,
+        "systolic_bp": vitals.systolic_bp,
+        "diastolic_bp": vitals.diastolic_bp,
+        "bmi": round(vitals.bmi, 2),
+        "heart_rate": vitals.heart_rate,
+        "body_temp": vitals.body_temp,
+        "symptoms": vitals.symptoms,
         "risk": risk,
-        "risk_probability": float(probability),
+        "risk_probability": probability,
         "timestamp": datetime.now(timezone.utc)
     }
+
     collection.insert_one(reading)
 
-    history = list(collection.find({"username": username}, {"_id": 0}).sort("timestamp", -1).limit(10))
+    history = list(collection.find(
+        {"username": username},
+        {"_id": 0}
+    ).sort("timestamp", -1).limit(10))
+
     return {
         "risk": risk,
         "risk_probability": round(probability * 100, 2),

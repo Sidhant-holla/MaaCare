@@ -1,101 +1,120 @@
 import pandas as pd
 import numpy as np
-import joblib
-
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from sklearn.impute import SimpleImputer
-from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report, accuracy_score
+import joblib
 
+# ----------------------------
+# LOAD DATASETS
+# ----------------------------
 
-# 1. LOAD DATASET
+pima = pd.read_csv("../data/main.csv")
+maternal = pd.read_csv("../data/mortality.csv")
 
-data = pd.read_csv("data/main.csv")
+# ----------------------------
+# CLEAN PIMA DATASET
+# ----------------------------
 
-print("Dataset loaded")
-print("Dataset shape:", data.shape)
+pima[['Glucose','BloodPressure','BMI']] = pima[['Glucose','BloodPressure','BMI']].replace(0, np.nan)
 
+pima = pima.dropna()
 
-# 2. SELECT FEATURES
+pima = pima.rename(columns={
+    "BloodPressure": "DiastolicBP"
+})
+
+pima["SystolicBP"] = pima["DiastolicBP"] + 40
+pima["HeartRate"] = 75
+pima["BodyTemp"] = 98.4
+
+pima["RiskLevel"] = pima["Outcome"].map({
+    0:0,
+    1:2
+})
+
+# ----------------------------
+# CLEAN MATERNAL DATASET
+# ----------------------------
+
+maternal = maternal.rename(columns={
+    "BS":"Glucose"
+})
+
+maternal["Pregnancies"] = 2
+maternal["BMI"] = 28
+
+maternal["RiskLevel"] = maternal["RiskLevel"].map({
+    "low risk":0,
+    "mid risk":1,
+    "high risk":2
+})
+
+# ----------------------------
+# SELECT COMMON FEATURES
+# ----------------------------
 
 features = [
+    "Age",
     "Pregnancies",
     "Glucose",
-    "BloodPressure",
+    "SystolicBP",
+    "DiastolicBP",
     "BMI",
-    "Age"
+    "HeartRate",
+    "BodyTemp",
+    "RiskLevel"
 ]
 
-X = data[features]
-y = data["Outcome"]
+pima = pima[features]
+maternal = maternal[features]
 
+dataset = pd.concat([pima, maternal], ignore_index=True)
 
-# 3. HANDLE MISSING DATA
+dataset = dataset.dropna()
 
-# Some medical datasets contain 0 values which are invalid
-X = X.replace(0, np.nan)
+# ----------------------------
+# SPLIT DATA
+# ----------------------------
 
-
-# 4. TRAIN TEST SPLIT
+X = dataset.drop("RiskLevel", axis=1)
+y = dataset["RiskLevel"]
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
+    X, y,
     test_size=0.2,
-    random_state=42,
-    stratify=y
+    random_state=42
 )
 
-# 5. BUILD ML PIPELINE
-pipeline = Pipeline([
-    ("imputer", SimpleImputer(strategy="median")),
-    ("model", RandomForestClassifier(
-        n_estimators=200,
-        random_state=42
-    ))
-])
+# ----------------------------
+# TRAIN MODEL
+# ----------------------------
 
-# 6. TRAIN MODEL
-pipeline.fit(X_train, y_train)
-
-print("\nModel training complete")
-
-# 7. PREDICT
-pred = pipeline.predict(X_test)
-
-accuracy = accuracy_score(y_test, pred)
-
-print("\nAccuracy:", accuracy)
-
-# 8. MODEL EVALUATION
-print("\nClassification Report:")
-print(classification_report(y_test, pred))
-
-print("\nConfusion Matrix:")
-print(confusion_matrix(y_test, pred))
-
-# 9. FEATURE IMPORTANCE
-model = pipeline.named_steps["model"]
-
-feature_importance = pd.Series(
-    model.feature_importances_,
-    index=features
+model = RandomForestClassifier(
+    n_estimators=300,
+    max_depth=10,
+    random_state=42
 )
 
-print("\nFeature Importance:")
-print(feature_importance.sort_values(ascending=False))
+model.fit(X_train, y_train)
 
-# 10. SAVE MODEL
-joblib.dump(pipeline, "ai_model/pregnancy_risk_model.pkl")
+# ----------------------------
+# EVALUATE
+# ----------------------------
 
-print("\nModel saved successfully")
+y_pred = model.predict(X_test)
 
-# 11. TEST PREDICTIONS
-print("\nTesting predictions")
+accuracy = accuracy_score(y_test, y_pred)
 
-test_low = pd.DataFrame([[1,120,80,25,22]], columns=features)
-test_high = pd.DataFrame([[4,180,100,35,38]], columns=features)
+print("\nModel Accuracy:", accuracy)
 
-print("Low risk example:", pipeline.predict(test_low))
-print("High risk example:", pipeline.predict(test_high))
+print("\nClassification Report:\n")
+print(classification_report(y_test, y_pred))
+
+# ----------------------------
+# SAVE MODEL
+# ----------------------------
+
+joblib.dump(model, "maternal_risk_model.pkl")
+
+print("\nModel saved as maternal_risk_model.pkl")
