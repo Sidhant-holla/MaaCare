@@ -74,3 +74,10 @@ uvicorn api:app --reload
 - **Output:** 3-class classification — low risk, medium risk, high risk
 - **Accuracy:** ~81% on held-out test set
 - **Safety layer:** Clinical threshold overrides for extreme vitals that fall outside the model's training distribution
+
+## Contributors
+
+- Nikita Mankani
+- Sidhant Holla
+- Niyatee Singh
+- Neha Rastogi
