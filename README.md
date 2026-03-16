@@ -19,7 +19,7 @@ Maternal health monitoring platform that uses machine learning to assess pregnan
 | Backend | FastAPI, PyJWT, bcrypt |
 | Database | MongoDB (Users + Readings collections) |
 | ML | scikit-learn RandomForestClassifier, joblib |
-| Data | Maternal Mortality Risk dataset + Pima Indians Diabetes dataset |
+| Data | Maternal Mortality Risk dataset + Pima Indians Diabetes dataset, Pregnancy Dataset |
 
 ## Project Structure
 
@@ -27,21 +27,26 @@ Maternal health monitoring platform that uses machine learning to assess pregnan
 MaaCare/
 ├── ai_model/
 │   ├── train_model.py        # data cleaning, training, evaluation
-│   ├── predict.py             # standalone prediction test
+│   ├── predict.py            # standalone prediction test
 │   └── maternal_risk_model.pkl
+│
 ├── backend/
-│   └── api.py                 # FastAPI endpoints, JWT auth, prediction logic
+│   └── api.py                # FastAPI endpoints, JWT auth, prediction logic
+│
 ├── mobile_app/
-│   ├── index.html             # main dashboard
-│   ├── login.html             # auth page with splash animation
-│   ├── script.js              # dashboard logic, chart, diagnostics
-│   ├── auth.js                # login/signup handlers
+│   ├── index.html            # main dashboard
+│   ├── login.html            # auth page with splash animation
+│   ├── script.js             # dashboard logic, chart, diagnostics
+│   ├── auth.js               # login/signup handlers
 │   └── style.css
+│
 ├── data/
-│   ├── mortality.csv          # maternal health dataset (1014 rows)
-│   └── main.csv               # Pima diabetes dataset (768 rows)
-└── assets/
-    └── MaaCare logo.jpeg
+│   ├── mortality.csv         # maternal health dataset (1014 rows)
+│   ├── main.csv              # Pima diabetes dataset (768 rows)
+│   └── preg.xlsx             # pregnancy dataset
+│
+├── assets/
+│   └── MaaCare_logo.jpeg
 ```
 
 ## Setup
@@ -69,7 +74,7 @@ uvicorn api:app --reload
 ## Model Details
 
 - **Algorithm:** RandomForest (300 trees, max depth 10)
-- **Training data:** Combined Pima diabetes + maternal mortality datasets, cleaned and aligned to 8 shared features
+- **Training data:** Combined Pima diabetes + maternal mortality datasets + pregnancy datasets, cleaned and aligned to 8 shared features
 - **Features:** Age, Pregnancies, Glucose, SystolicBP, DiastolicBP, BMI, HeartRate, BodyTemp
 - **Output:** 3-class classification — low risk, medium risk, high risk
 - **Accuracy:** ~81% on held-out test set
